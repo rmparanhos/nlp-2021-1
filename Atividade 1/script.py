@@ -35,12 +35,19 @@ def trata_carta(arq):
 #Separe 70% das cartas para fazer a criação dos dicionários de tokenização e 30% para fazer o teste da sua implementação 
 #(os 30% não podem ser usados ao criar o dicionário). Caso o processo fique lento (Wordpiece pode ser lento), 
 #você pode escolher um subconjunto das cartas.
-#def tokeniza_cartas():
+def tokeniza_cartas(diretorio,n_arq,k):
+    texto = " "
+    for i in range(0,n_arq):
+        f = open(diretorio + str(i) + ".txt", "r", encoding="utf-8")
+        texto = texto + f.read() + " "
+    print(texto)    
+    print(BPE(texto,k))
 
 def BPE(texto, k):
     #processo que cria o dicionario e o vocabulario
     dicionario = {}
     vocabulario = ['_']
+    print("processo que cria o dicionario e o vocabulario")
     for palavra in texto.split():
         if " ".join(palavra) + ' _' in dicionario.keys():
             dicionario[" ".join(palavra) + ' _'] = dicionario[" ".join(palavra) + ' _'] + 1
@@ -49,21 +56,19 @@ def BPE(texto, k):
             for letra in palavra:
                 if letra not in vocabulario:
                     vocabulario.append(letra)
-    print(dicionario)
-    print(vocabulario)
+    
+    print("encontra as combinacoes")
     for n in range(0,k):
-        ocorrencias = {}
-        
+        ocorrencias = {}        
         #gera as combinacoes
         for combinacao in list(itertools.permutations(vocabulario,2)):
             count = 0
             for chave in dicionario.keys():
                 if "".join(combinacao) in chave.replace(" ",""):
-                    print("".join(combinacao) + " EM " + chave)
+                    #print("".join(combinacao) + " EM " + chave)
                     count = count + dicionario[chave]
             if count > 0:        
                 ocorrencias["".join(combinacao)] = count
-        print(ocorrencias)
             
         #encontra a combinacao com maior ocorrencia
         while(True):
@@ -73,14 +78,32 @@ def BPE(texto, k):
                     maior_ocorrencia = [chave,ocorrencias[chave]]
                 if ocorrencias[chave] >= maior_ocorrencia[1]:
                     maior_ocorrencia = [chave,ocorrencias[chave]]
-            print(maior_ocorrencia)
             if maior_ocorrencia[0] in vocabulario:
                 ocorrencias[maior_ocorrencia[0]] = 0
             else:
+                print(maior_ocorrencia)
                 vocabulario.append(maior_ocorrencia[0])
                 break
-        print(vocabulario)
-
-
+    
+    print("montado o vocabularo, é o momento da tokenizacao de fato")
+    for token in vocabulario:
+        if len(token) > 1:
+            for chave in list(dicionario.keys()):
+                regex_token = r""
+                for char in token:
+                    regex_token = regex_token + char + " *"  
+                regex_token = regex_token + "?"    
+                chave_token = re.sub(regex_token,token,chave)
+                #print(regex_token)
+                #print(token)
+                #print(chave)
+                #print(chave_token)
+                if chave_token != chave:
+                    valor = dicionario[chave]
+                    dicionario.pop(chave)
+                    dicionario[chave_token] = valor
+    return vocabulario, dicionario
+    
 #trata_carta('cartas_van_gogh_segunda.txt')    
-BPE("low low low low low lowest lowest newer newer newer newer newer newer wider wider wider new new", 12)
+#print(BPE("low low low low low lowest lowest newer newer newer newer newer newer wider wider wider new new", 30))
+tokeniza_cartas('cartas_tratadas/', 20, 30)
