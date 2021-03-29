@@ -42,83 +42,6 @@ def trata_carta(arq):
 #Separe 70% das cartas para fazer a criação dos dicionários de tokenização e 30% para fazer o teste da sua implementação 
 #(os 30% não podem ser usados ao criar o dicionário). Caso o processo fique lento (Wordpiece pode ser lento), 
 #você pode escolher um subconjunto das cartas.
-def tokeniza_cartas(diretorio,n_arq,k):
-    texto = " "
-    for i in range(0,n_arq):
-        f = open(diretorio + str(i) + ".txt", "r", encoding="utf-8")
-        texto = texto + f.read() + " "
-    print(texto)    
-    print(BPE(texto,k))
-
-#implementacao feita por mim do bpe, antes de saber que podiamos utilizar o codigo dado em aula
-def bpe_raffael(texto, k):
-    #processo que cria o dicionario e o vocabulario
-    dicionario = {}
-    vocabulario = ['_']
-    print("processo que cria o dicionario e o vocabulario")
-    for palavra in texto.split():
-        if " ".join(palavra) + ' _' in dicionario.keys():
-            dicionario[" ".join(palavra) + ' _'] = dicionario[" ".join(palavra) + ' _'] + 1
-        else:
-            dicionario[" ".join(palavra) + ' _'] = 1
-            for letra in palavra:
-                if letra not in vocabulario:
-                    vocabulario.append(letra)
-    
-    print("encontra as combinacoes")
-    for n in range(0,k):
-        ocorrencias = {}        
-        #gera as combinacoes
-        for combinacao in list(itertools.permutations(vocabulario,2)):
-            count = 0
-            for chave in dicionario.keys():
-                if "".join(combinacao) in chave.replace(" ",""):
-                    #print("".join(combinacao) + " EM " + chave)
-                    count = count + dicionario[chave]
-            if count > 0:        
-                ocorrencias["".join(combinacao)] = count
-            
-        #encontra a combinacao com maior ocorrencia
-        while(True):
-            maior_ocorrencia = []
-            for chave in ocorrencias.keys():
-                if len(maior_ocorrencia) == 0:
-                    maior_ocorrencia = [chave,ocorrencias[chave]]
-                if ocorrencias[chave] >= maior_ocorrencia[1]:
-                    maior_ocorrencia = [chave,ocorrencias[chave]]
-            if maior_ocorrencia[0] in vocabulario:
-                ocorrencias[maior_ocorrencia[0]] = 0
-            else:
-                print(maior_ocorrencia)
-                vocabulario.append(maior_ocorrencia[0])
-                break
-    
-    print("montado o vocabularo, é o momento da tokenizacao de fato")
-    for token in vocabulario:
-        if len(token) > 1:
-            for chave in list(dicionario.keys()):
-                regex_token = r""
-                for char in token:
-                    regex_token = regex_token + char + " *"  
-                regex_token = regex_token + "?"    
-                chave_token = re.sub(regex_token,token,chave)
-                #print(regex_token)
-                #print(token)
-                #print(chave)
-                #print(chave_token)
-                if chave_token != chave:
-                    valor = dicionario[chave]
-                    dicionario.pop(chave)
-                    dicionario[chave_token] = valor
-    return vocabulario, dicionario
-
-#Parte 2:
-#Na segunda parte, você deve executar os algoritmos de tokenização BPE e WordPiece vistos na aula, ambos **implementados** por você. 
-#Além do script, você deve informar quantos tokens foram encontrados por cada abordagem e 
-#apontar exemplos de possíveis diferenças que cada abordagem pode ter encontrado. 
-#Separe 70% das cartas para fazer a criação dos dicionários de tokenização e 30% para fazer o teste da sua implementação 
-#(os 30% não podem ser usados ao criar o dicionário). Caso o processo fique lento (Wordpiece pode ser lento), 
-#você pode escolher um subconjunto das cartas.
 
 #Implementacao do bpe
 def get_stats(vocab):
@@ -149,10 +72,23 @@ def bpe(vocab, num_merges):
     print('BPE Finalizado')
     return vocab, best_list
 
+#Implementacao do max_match/tokenizacao
+def max_match_bpe(string, dictionary):
+    if len(string) == 0:
+        return []
+    for i in range(0,len(string)):
+        if i == 0:
+            firstword = string
+            remainder = ''
+        else:
+            firstword = string[:-i]
+            remainder = string[-i:]
+        if remainder in dictionary:
+            return [max_match_bpe(firstword,dictionary), remainder]
 
-def tokeniza_carta_bpe(diretorio,n_arq,k):
+def tokeniza_carta_bpe(diretorio,n_arq_treino,n_arq_teste,k):
     texto = " "
-    for i in range(0, n_arq):
+    for i in range(0, n_arq_treino):
         f = open(diretorio + str(i) + ".txt", "r", encoding="utf-8")
         texto = texto + f.read() + " "
     dicionario = {}   
@@ -163,16 +99,35 @@ def tokeniza_carta_bpe(diretorio,n_arq,k):
         else:
             dicionario[" ".join(palavra) + ' </w>'] = 1
     vocab, best_list = bpe(dicionario, k)
-    print('Escrevendo resultado do BPE num arquivo')
-    f = open(diretorio + "vocab.txt", "w", encoding="utf-8")
-    f.write("Parametros: n_arq = " + str(n_arq) + ", k = " + str(k) + "\n" + str(vocab))
-    print('vocab.txt contem o vocabulario')    
-    f = open(diretorio + "best_list.txt", "w", encoding="utf-8")
-    f.write("Parametros: n_arq = " + str(n_arq) + ", k = " + str(k) + "\n" + str(best_list))
-    print('best_list.txt contem a lista de todos os "bests", pares que sao encontrados mais vezes em uma iteracao')    
+    print('BPE encontrou ' + str(len(best_list)) + ' tokens')
+    f = open(diretorio + "vocab_bpe.txt", "w", encoding="utf-8")
+    f.write("Parametros: n_arq_treino = " + str(n_arq_treino) + ", k = " + str(k) + "\n" + str(vocab))
+    print('vocab_bpe.txt contem o vocabulario do bpe')    
+    f = open(diretorio + "best_list_bpe.txt", "w", encoding="utf-8")
+    f.write("Parametros: n_arq_treino = " + str(n_arq_treino) + ", k = " + str(k) + "\n" + str(best_list))
+    print('best_list_bpe.txt contem a lista de todos os "bests", pares que sao encontrados mais vezes em uma iteracao')    
+    print("Inciando MaxMatch / tokeninzacao")
+    #transforma o texto de teste no formato do maxmatch
+    texto = " "
+    for i in range(n_arq_teste, n_arq_teste*2):
+        f = open(diretorio + str(i) + ".txt", "r", encoding="utf-8")
+        texto = texto + f.read() + " "
+    texto_lista = []    
+    for palavra in texto.split():
+        texto_lista.append(palavra + '</w>')
+    #transforma o resultado do bpe no formato do maxmatch
+    best_list_max_match = []
+    for item in best_list:
+        best_list_max_match.append(item[0]+item[1])
+
+    f = open(diretorio + "tokenizado_bpe.txt", "w", encoding="utf-8")
+    f.write("Parametros: algoritmo = MaxMatch, n_arq_teste = " + str(n_arq_teste) + ", dictionary = best_list_bpe.txt" + "\n")    
+    f = open(diretorio + "tokenizado_bpe.txt", "a", encoding="utf-8")
+    for item in texto_lista:
+        f.write(item + ' -- ' + str(max_match_bpe(item,best_list_max_match)) + '\n')
+    print('tokenizacao_bpe.txt contem a tokenizacao, utilizando MaxMatch, dos arquivos de testes a partir do bpe montado usando os arquivos de teste')    
+    print("MaxMatch / tokeninzacao finalizado")
     
 #trata_carta('cartas_van_gogh_segunda.txt')    
-#print(BPE("low low low low low lowest lowest newer newer newer newer newer newer wider wider wider new new", 30))
-#tokeniza_cartas('cartas_tratadas/', 20, 30)
-#bpe({'l o w </w>':5, 'l o w e s t </w>':2, 'n e w e r </w>':6,'w i d e r </w>':3, 'n e w </w>':2}, 3)
-tokeniza_carta_bpe('cartas_tratadas/', 700, 50)
+tokeniza_carta_bpe('cartas_tratadas/', 600, 310, 30)
+#print(max_match('intention',["in", "tent","intent","tent", "tention", "tion", "ion"]))
