@@ -1,0 +1,80 @@
+Resultados utilizando 5000 de treino e 500 de teste, 
+como este dataset possui individuos nao classificado na base de teste, 
+o numero real de testes vai ser menor que 500.
+Este dataset consistia de uma serie de valores booleanos, indicando qual caracteristica de odio
+ele continha, caso todos fossem 0, nao era um discurso de odio.
+Portanto, para transformar num problema de classificacao de label conforme vimos na aula
+transformei, essa serie de valores booleanos em uma label. Caso o texto tivesse o atributo
+severe_toxic = 1, a label dada foi 2, toxic = 1 e severe_toxic = 0, a label dada foi 1.
+Por ultimo, caso severe_toxic = 0 e toxic = 0, a label foi 0. Assim temos um gradiente
+de discurso toxico de 0 a 2.
+
+Metricas:
+
+Label Não Toxico (0): 4688
+Label Toxico (1): 471
+Label Toxico Severo (2): 51
+
+Top 10 palavras nao toxicas por ocorrencias
+[('article', 2211), ('nt', 1859), ('page', 1761), ('use', 1080), ('edit', 1053), ('wikipedia', 1017), ('talk', 1009), ('like', 801), ('source', 779), ('think', 760)]
+
+Top 10 palavras toxicas por ocorrencias
+[('like', 198), ('nt', 184), ('fuck', 119), ('homo', 90), ('mitt', 87), ('romney', 87), ('wikipedia', 83), ('page', 78), ('edit', 77), ('block', 76)]
+
+Top 10 palavras toxicas severas por ocorrencias
+[('ass', 687), ('fuck', 256), ('u', 220), ('useless', 217), ('bot', 217), ('cocksucker', 79), ('fucker', 79), ('mothjer', 78), ('bitch', 11), ('fucking', 10)]
+
+1) Lemmatizacao e remocao de stopwords:
+
+Prevendo a base de treino
+precisão: 0.9841294349540078
+recall: 0.8409537856440511
+fscore: 0.9002791103900242
+suport: None
+
+Prevendo a base de teste
+precisão: 0.47527062336692794
+recall: 0.47028566179847525
+fscore: 0.4727584131833542
+suport: None
+
+Utilizando 10-fold cross validation o score foi: 0.9286
+
+Matriz de confusao: lemma_stopwords.png
+
+
+2) Lemmatizacao:
+
+Prevendo a base de treino
+precisão: 0.9770978049148255
+recall: 0.8562380704494187
+fscore: 0.9084754428254193
+suport: None
+
+Prevendo a base de teste
+precisão: 0.4753550543024227
+recall: 0.4720308624965555
+fscore: 0.47368421052631576
+suport: None
+
+Utilizando 10-fold cross validation o score foi: 0.9274000000000001
+
+Matriz de confusao: lemma.png
+
+3) Sem pre-processamento:
+
+Prevendo a base de treino
+precisão: 0.9780701672267936
+recall: 0.8663601133668807
+fscore: 0.9157726468843178
+suport: None
+
+Prevendo a base de teste
+precisão: 0.5044091710758377
+recall: 0.4913199228437586
+fscore: 0.49772403982930297
+suport: None
+
+Utilizando 10-fold cross validation o score foi: 0.9254000000000001
+
+Matriz de confusao: nopre.png
