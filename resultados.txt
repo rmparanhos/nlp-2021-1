@@ -1,0 +1,99 @@
+Resultados:
+
+10 Substantivos proprios (PROPN):
+1 - João -> Certo.
+2 - Romão -> Certo.
+3 - Botafogo -> Certo.
+4 - patrão -> Errado, o certo seria substantivo. Acredito que o erro tenha sido causado, pelos PROPN João e Romão, pois ambos dividem o sufixo "ão"
+5 - Bertoleza -> Certo.
+6 - Juiz -> Certo.
+7 - Fora -> Certo.
+8 - Bertoleza -> Certo.
+9 - manhã -> Errado, o certo seria substantivo. Acredito que o erro tenha sido causado, pelos PROPN João e Romão, pois possuem acento til no "a", "ã"
+10 - peixe -> Errado, o certo seria substantivo.
+
+10 Adjetivos (ADJ):
+1 - suja -> Certo
+2 - pouco -> Errado, o certo seria adverbio.
+3 - labutação -> Errado, substantivo.
+4 - duras -> Certo
+5 - própria -> Certo
+6 - cheio -> Certo
+7 - vizinha -> Certo
+8 - trintona -> Certo
+9 - velho -> Certo
+10 - residente -> Certo
+
+10 Verbos (VERB):
+1 - empregado -> Errado, é substantivo. Neste caso, ele considerou o participio de um verbo como VERB. Provalvel que seja por causda do prefixo
+2 - enriqueceu -> Certo, enriquecer.
+3 - taverna -> Errado, é substantivo.
+4 - economizou -> Certo, economizar.
+5 - ganhara -> Certo, ganhar.
+6 - retirar-se -> Certo, retirar.
+7 - deixou -> Certo, deixar.
+8 - vencidos -> Errado, é substantivo. Neste caso, ele considerou o participio de um verbo como VERB. Provalvel que seja por causda do prefixo
+9 - estabelecido -> Errado, é substantivo. Neste caso, ele considerou o participio de um verbo como VERB. Provalvel que seja por causda do prefixo
+10 - atirou-se -> Certou, atirar.
+
+10 Numerais (NUM):
+1 - treze -> Certo.
+2 - vinte -> Certo.
+3 - cinco -> Certo.
+4 - quatro -> Certo.
+5 - vinte -> Certo.
+6 - Um -> Certo.
+7 - forças -> Errado, forças pode ser verbo ou substantivo.
+8 - vinte -> Certo.
+9 - mil-réis -> Certo.
+10 - vinte -> Certo.
+
+10 Substantivos (NOUN):
+1 - anos -> Certo.
+2 - vendeiro -> Certo.
+3 - paredes -> Certo.
+4 - obscura -> Errado, é adjetivo.
+5 - refolhos -> Certo.
+6 - bairro -> Certo.
+7 - dúzia -> Certo.
+8 - anos -> Certo.
+9 - terra -> Certo.
+10 - pagamento -> Certo.
+
+
+Texto gerado, a partir do modelo orignal:
+
+like the power of , walkd i on remote acquaintance were of the illsheathed knife , hoofs were to no cross 
+feet , , friends , to her shall , her these blood , butchery of in . his her lately of of english shall king 
+henry , as which , , we with our a hundred , peace close , , his master fields of paces those . knife and the 
+shock of and henry , , meet , the palace . john all . in of shall womb in wellbeseeming ranks , no more 
+fight , like the nature against so advantage whose childrens those in . , to of , . i of as we and accents 
+walter english shall now afar bred , mothers , pagans entrance soil blessed for the war heaven whose those 
+blunt with , and are ranks moulded , , like the palace
+
+Fluencia: 
+Algumas pontuacoes repetidas. Para os 2-grams, a grande maioria faz sentido, como por exemplo "remote acquaintance", 
+"no cros" e "these blood". Para citar uma que nao faz sentido, temos "paces those". No 3-grams continuamos com um numero
+elevado de grams com sentido, por exemplo "the nature against" e "hoofs were to". Para 4-grams, a quantidade de grams que fazem
+sentido decai bastante, porem temos alguns exemplos interessantes de grams que fazem senitdo: "like the power of", "knife and the 
+shock" e "and are ranks moulded".
+
+
+Texto gerado, a partir do modelo treinado com O Cortiço:
+
+e a venda com do resignado com . proprietario e , , lado vinte disso , , mais participante a . da 
+afreguesada , . proprietario e morto superior , residente de . de anos , arranjavalhe uma esteira , e a 
+meia trintona das suas forcas , de , de , . , . . dos , aos vinte sobre sofrimentos privacoes de a do , 
+contoulhe a de , entre as quatro paredes de desgraca por dentro , estrompado como travesseiro fretes na rua , e , a 
+na e nessa anos , depois de jornal a de ainda da , , deixou ardor vendia e quatrocentos legua , por na grande o 
+escolheu para a duzia peixe refolhos do taverna vencidos de de . a de quase direto para frito dia , que de palha . 
+proprietario e uma que paredes reis , em era sua atirouse do por em as o foi , de jornal a o da conta , e as delirio 
+empenho trabalhava economizou nos , uma carroca de anos , uma quitandeira cego , , que tinha de palha
+
+Fluencia: 
+Novamente temos pontuações repetidas, desta vez com um numero bem elevado. Um gram de pontuação que chama atenção é ", . , . .".
+Os 2-grams seguem fazendo sentido em sua maioria, "como travesseiro" e "sobre sofrimentos" são exemplos. Para os 3-grams,
+"das suas forcas" e "uma quitandeira cego" (considerando que ele nao conhece a palavra cega) fazem sentido.
+Para 4-grams, "uma carroca de anos" e "entre as quatro paredes" chama a atenção pela coesão. Uma outra sequencia, impressionante,
+gerada pelo GenTex é "entre as quatro paredes de desgraca por dentro", um 8-gram que relacionou "quatro paredes", uma expressão
+utilizada para descrever um ambiente fechado com "dentro".

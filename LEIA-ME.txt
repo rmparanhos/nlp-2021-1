@@ -1,0 +1,5 @@
+Boa noite professora, segue minha Atividade 4. Ela é composta dos arquivos script.py, que é o script Python utilizado na atividade, e resultados.txt, que possui os resultados e informações pedidas na atividade.
+
+O dataset escolhido foi o https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge, e mais informações sobre como ele foi utilizado se encontra também no resultados.txt
+
+Qualquer duvida me avise por favor.
