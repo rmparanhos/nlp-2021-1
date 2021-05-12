@@ -15,26 +15,27 @@
 #- Variar hiperparâmetros do experimento1
 
 import pandas as pd
-import spacy
-import string
-import sklearn 
 import seaborn as sns
 import matplotlib.pyplot as plt
-import collections as cl
-from spacy.lang.en.stop_words import STOP_WORDS
-from spacy.lang.en import English
-from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer, TfidfVectorizer
-from sklearn.model_selection import train_test_split, cross_val_score
+
+import torch
+from torchtext.legacy import data
+import torch.nn as nn
+from torch.utils.data import DataLoader
+import time
+from torch.utils.data.dataset import random_split
+from sklearn.metrics import confusion_matrix
+
 
 #Abrindo dataset
 train_df = pd.read_csv('jigsaw-toxic-comment-classification-challenge/train.csv')
 test_df = pd.read_csv('jigsaw-toxic-comment-classification-challenge/test.csv')
 test_labels_df = pd.read_csv('jigsaw-toxic-comment-classification-challenge/test_labels.csv')
 
-NUM_ROWS = 100000
+NUM_ROWS = 5000
 #diminuindo tamanho para agilizar
 train_df = train_df.head(NUM_ROWS)
-test_df = test_df.head(int(NUM_ROWS/10))
+test_df = test_df.head(int(NUM_ROWS/5))
 #concatena pra ter o resultado do teste, depois remove coluna duplicada
 test_df = pd.concat([test_df, test_labels_df], axis=1, join="inner").T.drop_duplicates().T
 
@@ -64,6 +65,7 @@ comp_df['label'] = comp_df.apply (lambda row: label_toxicity(row), axis=1)
 #reduzindo as colunas
 comp_df = comp_df[['comment_text','label','is_test']]
 #metrica, numero de exemplos por classe:
+print("Dataset original")
 print("Label Não Toxico (0): {}".format(comp_df[comp_df['label']==0].count()['label']))
 print("Label Toxico (1): {}".format(comp_df[comp_df['label']==1].count()['label']))
 print("Label Toxico Severo (2): {}".format(comp_df[comp_df['label']==2].count()['label']))
@@ -78,32 +80,38 @@ comp_df.comment_text = comp_df.comment_text.str.replace(r'( +)'," ")
 comp_df.comment_text = comp_df.comment_text.str.strip()
 
 
-new_df = pd.concat([comp_df[comp_df['label']==0].head(int(NUM_ROWS/10)), 
+new_df = pd.concat([comp_df[(comp_df['label']==0) & (comp_df['is_test']==0)].head(int(NUM_ROWS/7)), 
+comp_df[(comp_df['label']==0) & (comp_df['is_test']==1)],
 comp_df[comp_df['label']==1].head(int(NUM_ROWS)), 
 comp_df[comp_df['label']==2].head(int(NUM_ROWS))])
 new_df.reset_index(drop=True, inplace=True)
-print("Label Não Toxico (0): {}".format(new_df[new_df['label']==0].count()['label']))
-print("Label Toxico (1): {}".format(new_df[new_df['label']==1].count()['label']))
-print("Label Toxico Severo (2): {}".format(new_df[new_df['label']==2].count()['label']))
+#print("Label Não Toxico (0): {}".format(new_df[new_df['label']==0].count()['label']))
+#print("Label Toxico (1): {}".format(new_df[new_df['label']==1].count()['label']))
+#print("Label Toxico Severo (2): {}".format(new_df[new_df['label']==2].count()['label']))
 
 #gerando csvs para abrir no tensor
+print("")
+print("Após divisão e rebalanceamento de labels")
+print("")
 treino_df = new_df[new_df['is_test']==0]
+print("No treino:")
+print("Label Não Toxico (0): {}".format(treino_df[treino_df['label']==0].count()['label']))
+print("Label Toxico (1): {}".format(treino_df[treino_df['label']==1].count()['label']))
+print("Label Toxico Severo (2): {}".format(treino_df[treino_df['label']==2].count()['label']))
+print("")
 treino_df.to_csv(path_or_buf='treino.csv',index=False)
 
+
 teste_df = new_df[new_df['is_test']==1]
+print("No teste:")
+print("Label Não Toxico (0): {}".format(teste_df[teste_df['label']==0].count()['label']))
+print("Label Toxico (1): {}".format(teste_df[teste_df['label']==1].count()['label']))
+print("Label Toxico Severo (2): {}".format(teste_df[teste_df['label']==2].count()['label']))
+print("")
 teste_df.to_csv(path_or_buf='teste.csv',index=False)
 
 #tensor
-import torch
-import torchtext
-from torchtext.legacy import data
-#from torchtext.datasets import text_classification
-#train_dataset, test_dataset = 'corona_NLP_train.csv', 'corona_NLP_test.csv'
-#BATCH_SIZE = 16
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-import torch.nn as nn
-import torch.nn.functional as F
 class TextSentiment(nn.Module):
     def __init__(self, vocab_size, embed_dim, drop_prob, hs1, num_class):
         super().__init__()
@@ -179,7 +187,6 @@ def generate_batch(batch):
   #print(offsets)
   return _text, offsets, label
 
-from torch.utils.data import DataLoader
 
 def train_func(sub_train_):
 
@@ -221,9 +228,7 @@ def test(data_):
 
     return loss / len(data_), acc / len(data_)
 
-import time
-from torch.utils.data.dataset import random_split
-import torch.optim as optim
+
 N_EPOCHS = 20
 min_valid_loss = float('inf')
 
@@ -290,26 +295,79 @@ def predict(_text, model, vocab, ngrams):
         return output.argmax(1).item()
 
 model = model.to('cpu')
-only_mistakes = True
 erros = 0
+acertos = 0
+
+previsao_nao_toxicos = 0
+previsao_toxicos = 0
+previsao_toxicos_severos = 0
+
+acertos_nao_toxicos = 0
 acertos_toxicos = 0
 acertos_toxicos_severos = 0
-for entry in test_data:
-  prediction = predict(entry.comment_text, model, text.vocab, NGRAMS)
-  if only_mistakes and int(entry.label[0]) != prediction:
-    erros += 1
-    print('\n----ERRO-----')
-    print('Label real: ', label[int(entry.label[0])], "\nTexto:", " ".join(entry.comment_text), "\nLabel prevista: ",label[prediction])
-  elif prediction == 1:
-    acertos_toxicos += 1
-    print('\n----ACERTO-TOXICO----')
-    print('Label real: ', label[int(entry.label[0])], "\nTexto:", " ".join(entry.comment_text), "\nLabel prevista: ",label[prediction])
-  elif prediction == 2:
-    acertos_toxicos_severos += 1
-    print('\n----ACERTO-TOXICO-SEVERO---')
-    print('Label real: ', label[int(entry.label[0])], "\nTexto:", " ".join(entry.comment_text), "\nLabel prevista: ",label[prediction])
 
-print(erros)
-print(acertos_toxicos)  
-print(acertos_toxicos_severos)
+erros_nao_toxicos = 0
+erros_toxicos = 0
+erros_toxicos_severos = 0
+
+#para a matriz de confusao:
+original = []
+previsoes = []
+
+for entry in test_data:
+    prediction = predict(entry.comment_text, model, text.vocab, NGRAMS)
+    if prediction == int(entry.label[0]):
+        acertos += 1
+        if prediction == 0:
+            previsao_nao_toxicos += 1 
+            acertos_nao_toxicos += 1
+        elif prediction == 1:
+            previsao_toxicos += 1
+            acertos_toxicos += 1
+        elif prediction == 2:
+            previsao_toxicos_severos += 1
+            acertos_toxicos_severos += 1
+    elif prediction != int(entry.label[0]):
+        erros += 1
+        if prediction == 0:
+            previsao_nao_toxicos +=1
+            erros_nao_toxicos += 1
+        elif prediction == 1:
+            previsao_toxicos +=1
+            erros_toxicos += 1
+        elif prediction == 2:
+            previsao_toxicos_severos += 1
+            erros_toxicos_severos += 1
+        print('\n----ERRO---')
+        print('Label real: ', label[int(entry.label[0])], "\nTexto:", " ".join(entry.comment_text), "\nLabel prevista: ",label[prediction])
+    
+    original.append(int(entry.label[0]))
+    previsoes.append(prediction)
+
+print("")
+print("Erros: ",erros)
+print("Acertos: ",acertos)
+
+print("Previsoes nao toxicos: ",previsao_nao_toxicos)
+print("Acertos nao toxicos: ",acertos_nao_toxicos)
+print("Erros nao toxicos: ",erros_nao_toxicos)
+
+print("Previsoes toxicos: ",previsao_toxicos)
+print("Acertos toxicos: ",acertos_toxicos)
+print("Erros toxicos: ",erros_toxicos)
+
+print("Previsoes toxicos severos: ",previsao_toxicos_severos)
+print("Acertos toxicos severos: ",acertos_toxicos_severos)
+print("Erros toxicos severos: ",erros_toxicos_severos)
+
+cm=confusion_matrix(original, previsoes)
+
+def plot_cm(conf_matrix):
+  sns.set(font_scale=1.4,color_codes=True,palette="deep")
+  sns.heatmap(cm,annot=True,annot_kws={"size":16},fmt="d",cmap="YlGnBu")
+  plt.title("Confusion Matrix")
+  plt.xlabel("Predicted Value")
+  plt.ylabel("True Value")
+  plt.savefig('plot.png')
+plot_cm(cm)
 #predictions = [predict(entry.text, model, text.vocab, NGRAMS) for entry in test_data]
