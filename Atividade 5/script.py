@@ -12,7 +12,7 @@
 #- Experimento 1: Embedding Layer + nn Layer + Layer de classificação (e.: sentimento positivo ou negativo)
 #- Experimento  2: W2V +  nn Layer + Layer de classificação (e.: sentimento positivo ou negativo)
 #- Comparar desempenho dos experimentos
-#- Variar hiperparâmetros do experimento1
+#- Variar hiperparâmetros do experimentos
 
 import pandas as pd
 import seaborn as sns
@@ -33,6 +33,7 @@ test_df = pd.read_csv('jigsaw-toxic-comment-classification-challenge/test.csv')
 test_labels_df = pd.read_csv('jigsaw-toxic-comment-classification-challenge/test_labels.csv')
 
 NUM_ROWS = 5000
+LR = 1
 #diminuindo tamanho para agilizar
 train_df = train_df.head(NUM_ROWS)
 test_df = test_df.head(int(NUM_ROWS/5))
@@ -117,6 +118,7 @@ class TextSentiment(nn.Module):
         super().__init__()
         self.embedding = nn.EmbeddingBag(vocab_size, embed_dim, sparse=True)
         self.relu = nn.ReLU()
+        #self.tanh = nn.Tanh()
         self.softmax = nn.Softmax(dim=1)
         self.dropout = nn.Dropout(drop_prob)
         self.fc1 = nn.Linear(embed_dim, hs1) 
@@ -135,6 +137,7 @@ class TextSentiment(nn.Module):
         embedded = self.embedding(text, offsets)
         x = embedded.view(embedded.shape[0], -1)
         x = self.relu(self.fc1(x))
+        #x = self.tanh(self.fc1(x))
         x = self.dropout(x)
         preds = self.softmax(self.fc2(x))
         return preds
@@ -233,7 +236,7 @@ N_EPOCHS = 20
 min_valid_loss = float('inf')
 
 criterion = torch.nn.CrossEntropyLoss().to(device)
-optimizer = torch.optim.SGD(model.parameters(), lr=1.0)
+optimizer = torch.optim.SGD(model.parameters(), lr=LR)
 #optimizer = optim.SparseAdam(model.parameters())
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.9)
 
