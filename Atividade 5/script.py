@@ -161,40 +161,38 @@ test_data = data.TabularDataset(path="teste.csv",
                                         ('comment_text', text),
                                         ('label', data.Field())],
                                 skip_header=True)
-#text.build_vocab(train_data, test_data)
 
+#EMBEDDINGS - Para utilizar, descomente esta area e comente a area de WORD2VEC------------------------
+#text.build_vocab(train_data, test_data)
 #VOCAB_SIZE = len(text.vocab)
-##NGRAMS = 2
 #BATCH_SIZE = 8
 #EMBED_DIM = 32
 #NUM_CLASS = 5
 #DROPOUT_PROB = 0.5
 #HS1 = 128
 #model = TextSentiment(VOCAB_SIZE, EMBED_DIM, DROPOUT_PROB, HS1, NUM_CLASS).to(device)
+#-----------------------------------------------------------------------------------------------------
 
-text.build_vocab(train_data, test_data)		#text.build_vocab(train_data, test_data)
+#WORD2VEC - Para utilizar, descomente esta area e comente a area de EMBEDDINGS------------------------
+text.build_vocab(train_data, test_data)		
 MAX_VOCAB_SIZE = 25_000
 text.build_vocab(train_data, test_data, 
                  max_size = MAX_VOCAB_SIZE, 
-                 #vectors = "glove.6B.100d", 
-                 #vectors = "glove.twitter.27B.100d",
-                 vectors = "fasttext.en.100d",
+                 vectors = "glove.6B.50d",
                  unk_init = torch.Tensor.normal_)
-#PAD_IDX = text.vocab.stoi[text.pad_token]
 VOCAB_SIZE = len(text.vocab)
 NGRAMS = 2
 BATCH_SIZE = 8
-EMBED_DIM = 32
+EMBED_DIM = 50
 NUM_CLASS = 5
 DROPOUT_PROB = 0.5
 HS1 = 128
-model = TextSentiment(VOCAB_SIZE, EMBED_DIM, DROPOUT_PROB, HS1, NUM_CLASS, True).to(device)
+model = TextSentiment(VOCAB_SIZE, EMBED_DIM, DROPOUT_PROB, HS1, NUM_CLASS).to(device)
 pretrained_embeddings = text.vocab.vectors
 model.embedding.weight.data.copy_(pretrained_embeddings)
 UNK_IDX = text.vocab.stoi[text.unk_token]
 model.embedding.weight.data[UNK_IDX] = torch.zeros(EMBED_DIM)
-#model.embedding.weight.data[PAD_IDX] = torch.zeros(EMBED_DIM)
-#print(model.embedding.weight.data)
+#-----------------------------------------------------------------------------------------------------
 
 def generate_batch(batch):
   label = torch.tensor([int(entry.label[0]) for entry in batch])
@@ -210,8 +208,6 @@ def generate_batch(batch):
   # torch.Tensor([1.0, 2.0, 3.0]).cumsum(dim=0)
   offsets = torch.tensor(offsets[:-1]).cumsum(dim=0)
   _text = torch.cat(_text)
-  #print(' BATCH' , _text)
-  #print(offsets)
   return _text, offsets, label
 
 
@@ -248,7 +244,6 @@ def test(data_):
         text, offsets, cls = text.to(device), offsets.to(device), cls.to(device)
         with torch.no_grad():
             output = model(text, offsets)
-            #print(output, cls)
             loss = criterion(output, cls)
             loss += loss.item()
             acc += (output.argmax(1) == cls).sum().item()
@@ -261,7 +256,6 @@ min_valid_loss = float('inf')
 
 criterion = torch.nn.CrossEntropyLoss().to(device)
 optimizer = torch.optim.SGD(model.parameters(), lr=LR)
-#optimizer = optim.SparseAdam(model.parameters())
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1, gamma=0.9)
 
 train_len = int(len(train_data) * 0.95)
@@ -397,4 +391,4 @@ def plot_cm(conf_matrix):
   plt.ylabel("True Value")
   plt.savefig('plot.png')
 plot_cm(cm)
-#predictions = [predict(entry.text, model, text.vocab, NGRAMS) for entry in test_data]
+

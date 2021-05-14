@@ -1,0 +1,183 @@
+Resultados utilizando 5000 de treino e 1000 de teste, 
+como este dataset possui individuos nao classificados na base de teste, 
+o numero real de testes vai ser menor que 1000.
+Este dataset consistia de uma serie de valores booleanos, indicando qual caracteristica de odio
+ele continha, caso todos fossem 0, nao era um discurso de odio.
+Portanto, para transformar num problema de classificacao de label conforme vimos na aula
+transformei, essa serie de valores booleanos em uma label. Caso o texto tivesse o atributo
+severe_toxic = 1, a label dada foi 2, toxic = 1 e severe_toxic = 0, a label dada foi 1.
+Por ultimo, caso severe_toxic = 0 e toxic = 0, a label foi 0. Assim temos um gradiente
+de discurso toxico de 0 a 2.
+
+Para os testes foi necessario rebalancear as labels, pois o numero de individuos com label nao toxico era muito
+superior, e todos os testes eram classificados como não toxicos:
+
+    Dataset original
+    Label Não Toxico (0): 4891
+    Label Toxico (1): 485
+    Label Toxico Severo (2): 53
+
+Após o rebalanceameanto e divisao entre treino e teste:
+
+    No treino:
+    Label Não Toxico (0): 714
+    Label Toxico (1): 452
+    Label Toxico Severo (2): 51
+
+    No teste:
+    Label Não Toxico (0): 394
+    Label Toxico (1): 33
+    Label Toxico Severo (2): 2
+
+Experimentos:
+
+1) Embedding Layer + nn Layer + Layer de classificação, sem variacao de hiperparametros:
+
+Resultados do teste:
+    Loss: 0.0070(test)      |       Acc: 78.8%(test)
+
+Previsoes:
+    Erros:  59
+    Acertos:  370
+    
+    Previsoes nao toxicos:  367
+    Acertos nao toxicos:  351
+    Erros nao toxicos:  16
+    
+    Previsoes toxicos:  62
+    Acertos toxicos:  19
+    Erros toxicos:  43
+    
+    Previsoes toxicos severos:  0
+    Acertos toxicos severos:  0
+    Erros toxicos severos:  0
+
+Exemplos de erros:
+
+    Label real:  Não Toxico 
+    Texto: Will you all please just listen to yourselves for a moment Your socalled theories as to their relationship are irrelevant Go go and find sources or stop wasting all of our time with pointless Original Research Why is it that the simplest of all Wikipedia guidelines is so misunderstood by so many people 
+    Label prevista:  Toxico
+
+    Label real:  Toxico Severo 
+    Texto: casualt i fucked your mum and i liked it ies 
+    Label prevista:  Não Toxico
+    
+    Label real:  Toxico 
+    Texto: This I hate Eagles for since he made that comment every action I undertake somebody is fucking me in the ass for it I m thinking a trip to ANI would be productive Thoughts 
+    Label prevista:  Não Toxico
+
+
+
+Matriz de confusao: original.png
+    
+2) Embedding Layer + nn Layer + Layer de classificação, trocando a funcao de ativacao de ReLU para Tanh:
+
+Resultados do teste:
+    Loss: 0.0070(test)      |       Acc: 75.3%(test)
+
+Previsoes:
+    Erros:  148
+    Acertos:  281
+
+    Previsoes nao toxicos:  258
+    Acertos nao toxicos:  253
+    Erros nao toxicos:  5
+
+    Previsoes toxicos:  171
+    Acertos toxicos:  28
+    Erros toxicos:  143
+
+    Previsoes toxicos severos:  0
+    Acertos toxicos severos:  0
+    Erros toxicos severos:  0
+
+Exemplos de erros:
+
+    Label real:  Não Toxico 
+    Texto: Will you all please just listen to yourselves for a moment Your socalled theories as to their relationship are irrelevant Go go and find sources or stop wasting all of our time with pointless Original Research Why is it that the simplest of all Wikipedia guidelines is so misunderstood by so many people 
+    Label prevista:  Toxico
+
+    Label real:  Toxico Severo 
+    Texto: casualt i fucked your mum and i liked it ies 
+    Label prevista:  Toxico
+
+    Label real:  Toxico 
+    Texto: If ya not still fuk u 
+    Label prevista:  Não Toxico
+
+Matriz de confusao: var1.png
+
+3) Embedding Layer + nn Layer + Layer de classificação, trocando a taxa de aprendizado (lr) de 1 para 0.1:
+
+Resultados do teste:
+    Loss: 0.0073(test)      |       Acc: 80.2%(test)
+
+Previsoes:
+    Erros:  104
+    Acertos:  325
+
+    Previsoes nao toxicos:  335
+    Acertos nao toxicos:  313
+    Erros nao toxicos:  22
+
+    Previsoes toxicos:  94
+    Acertos toxicos:  12
+    Erros toxicos:  82
+
+    Previsoes toxicos severos:  0
+    Acertos toxicos severos:  0
+    Erros toxicos severos:  0
+
+Exemplos de erros:
+
+    Label real:  Não Toxico 
+    Texto: Will you all please just listen to yourselves for a moment Your socalled theories as to their relationship are irrelevant Go go and find sources or stop wasting all of our time with pointless Original Research Why is it that the simplest of all Wikipedia guidelines is so misunderstood by so many people 
+    Label prevista:  Toxico
+
+    Label real:  Toxico Severo 
+    Texto: casualt i fucked your mum and i liked it ies 
+    Label prevista:  Não Toxico
+
+    Label real:  Toxico 
+    Texto: This I hate Eagles for since he made that comment every action I undertake somebody is fucking me in the ass for it I m thinking a trip to ANI would be productive Thoughts 
+    Label prevista:  Não Toxico
+
+Matriz de confusao: var2.png
+
+4) word2vec (glove.6B.50d) Layer + nn Layer + Layer de classificação:
+
+Resultados do teste:
+    Loss: 0.0070(test)      |       Acc: 78.3%(test)
+
+Previsoes:
+    Erros:  116
+    Acertos:  313
+
+    Previsoes nao toxicos:  294
+    Acertos nao toxicos:  287
+    Erros nao toxicos:  7
+    
+    Previsoes toxicos:  135
+    Acertos toxicos:  26
+    Erros toxicos:  109
+    
+    Previsoes toxicos severos:  0
+    Acertos toxicos severos:  0
+    Erros toxicos severos:  0
+
+Exemplos de erros:
+
+    Label real:  Não Toxico 
+    Texto: Will you all please just listen to yourselves for a moment Your socalled theories as to their relationship are irrelevant Go go and find sources or stop wasting all of our time with pointless Original Research Why is it that the simplest of all Wikipedia guidelines is so misunderstood by so many people 
+    Label prevista:  Toxico
+
+    Label real:  Toxico Severo 
+    Texto: casualt i fucked your mum and i liked it ies 
+    Label prevista:  Toxico
+
+    Label real:  Toxico 
+    Texto: This I hate Eagles for since he made that comment every action I undertake somebody is fucking me in the ass for it I m thinking a trip to ANI would be productive Thoughts 
+    Label prevista:  Não Toxico
+
+Matriz de confusao: word2vec.png
+

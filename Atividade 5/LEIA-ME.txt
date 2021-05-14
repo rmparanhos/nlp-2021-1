@@ -1,0 +1,7 @@
+Boa noite professora, segue minha Atividade 3. Ela é composta dos arquivos script.py, que é o script Python utilizado na atividade, e resultados.txt, que possui os resultados e informações pedidas na atividade alem dos gráficos em .png gerados.
+
+O dataset escolhido foi o https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge, e mais informações sobre como ele foi utilizado se encontra também no resultados.txt
+
+Foram obtidas métricas do dataset como numero de instancias por label, e top 10 palavras por label. Para construcao do modelo, foi feito de 3 formas: com lemmatizacao e remoção de stopwords, apenas com lemmatizacao e sem pre processamento. Em cada modelo, temos a precisão, recall e fscore (para base de treino e de teste para poder comparar conforme na video aula) e o score do 10-fold Cross validation.
+
+Qualquer duvida me avise por favor.
