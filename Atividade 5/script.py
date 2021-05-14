@@ -127,7 +127,7 @@ class TextSentiment(nn.Module):
 
     def init_weights(self):
         initrange = 0.5
-        self.embedding.weight.data.uniform_(-initrange, initrange)
+        #self.embedding.weight.data.uniform_(-initrange, initrange)
         self.fc1.weight.data.uniform_(-initrange, initrange)
         self.fc2.weight.data.uniform_(-initrange, initrange)
         self.fc1.bias.data.zero_()
@@ -161,16 +161,40 @@ test_data = data.TabularDataset(path="teste.csv",
                                         ('comment_text', text),
                                         ('label', data.Field())],
                                 skip_header=True)
-text.build_vocab(train_data, test_data)
+#text.build_vocab(train_data, test_data)
 
+#VOCAB_SIZE = len(text.vocab)
+##NGRAMS = 2
+#BATCH_SIZE = 8
+#EMBED_DIM = 32
+#NUM_CLASS = 5
+#DROPOUT_PROB = 0.5
+#HS1 = 128
+#model = TextSentiment(VOCAB_SIZE, EMBED_DIM, DROPOUT_PROB, HS1, NUM_CLASS).to(device)
+
+text.build_vocab(train_data, test_data)		#text.build_vocab(train_data, test_data)
+MAX_VOCAB_SIZE = 25_000
+text.build_vocab(train_data, test_data, 
+                 max_size = MAX_VOCAB_SIZE, 
+                 #vectors = "glove.6B.100d", 
+                 #vectors = "glove.twitter.27B.100d",
+                 vectors = "fasttext.en.100d",
+                 unk_init = torch.Tensor.normal_)
+#PAD_IDX = text.vocab.stoi[text.pad_token]
 VOCAB_SIZE = len(text.vocab)
-#NGRAMS = 2
+NGRAMS = 2
 BATCH_SIZE = 8
 EMBED_DIM = 32
 NUM_CLASS = 5
 DROPOUT_PROB = 0.5
 HS1 = 128
-model = TextSentiment(VOCAB_SIZE, EMBED_DIM, DROPOUT_PROB, HS1, NUM_CLASS).to(device)
+model = TextSentiment(VOCAB_SIZE, EMBED_DIM, DROPOUT_PROB, HS1, NUM_CLASS, True).to(device)
+pretrained_embeddings = text.vocab.vectors
+model.embedding.weight.data.copy_(pretrained_embeddings)
+UNK_IDX = text.vocab.stoi[text.unk_token]
+model.embedding.weight.data[UNK_IDX] = torch.zeros(EMBED_DIM)
+#model.embedding.weight.data[PAD_IDX] = torch.zeros(EMBED_DIM)
+#print(model.embedding.weight.data)
 
 def generate_batch(batch):
   label = torch.tensor([int(entry.label[0]) for entry in batch])
