@@ -1,7 +1,11 @@
-Boa noite professora, segue minha Atividade 3. Ela é composta dos arquivos script.py, que é o script Python utilizado na atividade, e resultados.txt, que possui os resultados e informações pedidas na atividade alem dos gráficos em .png gerados.
+Boa noite tarde, segue minha Atividade 5. Ela é composta dos arquivos script.py, que é o script Python utilizado na atividade para o experimento, e resultados.txt, que possui as conclusoes, resultados dos experimentos e informações pedidas na atividade alem dos gráficos em .png gerados.
 
 O dataset escolhido foi o https://www.kaggle.com/c/jigsaw-toxic-comment-classification-challenge, e mais informações sobre como ele foi utilizado se encontra também no resultados.txt
 
-Foram obtidas métricas do dataset como numero de instancias por label, e top 10 palavras por label. Para construcao do modelo, foi feito de 3 formas: com lemmatizacao e remoção de stopwords, apenas com lemmatizacao e sem pre processamento. Em cada modelo, temos a precisão, recall e fscore (para base de treino e de teste para poder comparar conforme na video aula) e o score do 10-fold Cross validation.
+Quatro experimentos foram realizados na atividade:
+    1) Embeddings (ReLU e Taxa de Aprendizado = 1)
+    2) Embeddings (Tanh e Taxa de Aprendizado = 1)
+    3) Embeddings (ReLU e Taxa de Aprendizado = 0.1)
+    4) word2vec (ReLU e Taxa de Aprendizado = 1)
 
 Qualquer duvida me avise por favor.

@@ -181,3 +181,17 @@ Exemplos de erros:
 
 Matriz de confusao: word2vec.png
 
+Conclusão:
+
+    Entre os experimentos realizados o que teve a melhor acuracia foi o experimento 3, com 80.3% 
+    Verficando os resultados da previsão matrizes de confusão, o experimento 1, teve o menor numero de erros, 
+    com 59 de 370 instancias de teste, aproximadamente 84% de acerto. Provavelmente este numero alto foi causado pela 
+    grande quantidade de previsoes da classe 0 (Não Toxico), o maior componente do dataset (aproximadamente 80%).
+    Nenhum dos experimentos previu a classe 2 (Toxico Severo) para as instancias de teste.
+    Nos exemplos de erros, todos os teste previram 0 (Não Toxico) para o texto "Will you all please just listen to yourselves 
+    for a moment Your socalled theories as to their relationship are irrelevant Go go and find sources or stop wasting all of 
+    our time with pointless Original Research Why is it that the simplest of all Wikipedia guidelines is so misunderstood by 
+    so many people", quando deveria ter previsto a classe 1 (Toxico). Para o texto "casualt i fucked your mum and i liked it ies",
+    dois experimentos (1 e 3) previram a classe 0 e os experimentos (2 e 4) previram a classe 1, a classe correta era 2.
+
+    
